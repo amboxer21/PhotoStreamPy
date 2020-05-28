@@ -16,8 +16,6 @@ class MetaPhotostream(type):
         return super(MetaPhotostream, meta).__new__(meta, name, bases, dct)
 
     def __init__(cls,name,bases,dct):
-        if not hasattr(cls,'count'):
-            cls.count = 0
         if not hasattr(cls,'driver'):
             user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
             profile    = webdriver.FirefoxProfile()
@@ -46,10 +44,10 @@ class Photostream(metaclass=MetaPhotostream):
         pword.send_keys(self.password,Keys.RETURN)
         time.sleep(5)
 
-    def scroll_to_bottom(self):
+    def scroll_to_bottom(self,count=0):
         try:
-            while Photostream.count < self.timeout:
-                Photostream.count += 1
+            while count < self.timeout:
+                count += 1
                 self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 time.sleep(3)
                 try:
