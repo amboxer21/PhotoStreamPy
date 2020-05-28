@@ -18,10 +18,6 @@ class MetaPhotostream(type):
     def __init__(cls,name,bases,dct):
         if not hasattr(cls,'count'):
             cls.count = 0
-        if not hasattr(cls,'member_list'):
-            cls.member_list = {}
-        if not hasattr(cls,'site_name'):
-            cls.site_name = None
         if not hasattr(cls,'driver'):
             user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
             profile    = webdriver.FirefoxProfile()
@@ -52,9 +48,8 @@ class Photostream(metaclass=MetaPhotostream):
 
     def scroll_to_bottom(self):
         try:
-            iterator = 0
-            while iterator < self.timeout:
-                iterator += 1
+            while Photostream.count < self.timeout:
+                Photostream.count += 1
                 self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 time.sleep(3)
                 try:
@@ -67,12 +62,11 @@ class Photostream(metaclass=MetaPhotostream):
             print('Exception exception: '+str(exception))
             pass
 
-    def main(self,count=0):
+    def main(self):
         Photostream.driver.get("https://www.facebook.com/"+str(self.username)+"/photos_all")
         self.scroll_to_bottom()
         images = Photostream.driver.find_elements_by_xpath('//i[@style]')
         for image in images:
-            count += 1
             url = image.get_attribute("style")
             results = re.search('(background-image: url\(")(.*)("\);)', str(url), re.M | re.I)
             if results is not None:
