@@ -7,3 +7,5 @@ anthony@ghost:~$ sudo python setup.py install
 ```
 anthony@ghost:~$ python photostream.py -eexample@gmail.com -ppassword -ufbusername -O/home/anthony/Pictures/FB_Photos
 ```
+
+A `YouTube` **DEMO** can be found [here](https://youtu.be/Up0qrpY5Q3o)
