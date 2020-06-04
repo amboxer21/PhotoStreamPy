@@ -12,4 +12,4 @@ A `YouTube` **demo** can be found [here](https://youtu.be/Up0qrpY5Q3o)
 
 #### To do:
 
-Preserving the albums should be enabled by default while making the photostream a secondary option.
+Preserving the albums should be enabled by default while making the photostream feature(All photos in one place) a secondary option.
