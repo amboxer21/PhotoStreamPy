@@ -1,3 +1,6 @@
+#### Notice:
+Let the program run and **DO NOT** send the foreground process to the background or the program will not work correctly. Start the program and leave the computer alone until it finishes. 
+
 #### Install:
 ````
 anthony@ghost:~$ sudo python setup.py install
