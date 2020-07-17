@@ -5,8 +5,10 @@ import sys
 import time
 import wget
 
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from optparse import OptionParser
+from urllib.request import urlopen
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
@@ -25,11 +27,12 @@ class MetaPhotostream(type):
 class Photostream(metaclass=MetaPhotostream):
 
     def __init__(self,config_dict={}):
-        self.email        = config_dict['email']
-        self.timeout      = config_dict['timeout']
-        self.password     = config_dict['password']
-        self.username     = config_dict['username']
-        self.directory    = config_dict['directory']
+        self.email           = config_dict['email']
+        self.timeout         = config_dict['timeout']
+        self.password        = config_dict['password']
+        self.username        = config_dict['username']
+        self.directory       = config_dict['directory']
+        self.preserve_albums = config_dict['preserve_albums']
 
         if not all([self.directory, self.username]):
             print('FB username and save directory must be specified!')
@@ -63,9 +66,10 @@ class Photostream(metaclass=MetaPhotostream):
     def main(self):
         Photostream.driver.get("https://www.facebook.com/"+str(self.username)+"/photos_all")
         self.scroll_to_bottom()
-        images = Photostream.driver.find_elements_by_xpath('//i[@style]')
+        images  = Photostream.driver.find_elements_by_xpath('//i[@style]')
         for image in images:
             url = image.get_attribute("style")
+            print("url: "+str(url))
             results = re.search('(background-image: url\(")(.*)("\);)', str(url), re.M | re.I)
             if results is not None:
                 try:
@@ -91,14 +95,18 @@ if __name__ == '__main__':
     parser.add_option('-u', '--username',
         dest='username',
         help='This is your Facebook user name.')
+    parser.add_option('-P', '--preserve-albums',
+        dest='preserve_albums', action='store_true', default=False,
+        help='This will store your photos using the same album names that are on Facebook.')
     (options, args) = parser.parse_args()
 
     config_dict = {
-      'email'        : options.email,
-      'timeout'      : options.timeout,
-      'password'     : options.password,
-      'username'     : options.username,
-      'directory'    : options.directory,
+      'email'           : options.email,
+      'timeout'         : options.timeout,
+      'password'        : options.password,
+      'username'        : options.username,
+      'directory'       : options.directory,
+      'preserve_albums' : options.preserve_albums,
     }
 
     photostream = Photostream(config_dict)
