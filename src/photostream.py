@@ -93,11 +93,8 @@ class Photostream(metaclass=MetaPhotostream):
         except Exception as exception:
             print('Exception: '+str(exception))
             pass
-    
-    def main(self):
-        Photostream.driver.get("https://www.facebook.com/"+str(self.username)+"/photos_all")
-        self.scroll_to_bottom()
-        beautifulSoup = BeautifulSoup(Photostream.driver.page_source)
+
+    def preserve_photostream_albums(self,beautifulSoup):
         for link in beautifulSoup.find_all('li'):
             try:
                 self.parse_photo_metadata(link.find_all('a'))
@@ -107,6 +104,25 @@ class Photostream(metaclass=MetaPhotostream):
         for item in self.metadata.items():
             directory = self.create_album(self.directory,item[1]['album_name'])
             self.save_image(str(item[1]['photo_url']),str(directory))
+
+    def download_photostream(self):
+        images = Photostream.driver.find_elements_by_xpath('//i[@style]')
+        for image in images:
+            url = image.get_attribute("style")
+            results = re.search('(background-image: url\(")(.*)("\);)', str(url), re.M | re.I)
+            if results is not None:
+                try:
+                    wget.download(results.group(2),out=self.directory)
+                except:
+                    pass
+    
+    def main(self):
+        Photostream.driver.get("https://www.facebook.com/"+str(self.username)+"/photos_all")
+        self.scroll_to_bottom()
+        if self.preserve_albums:
+            self.preserve_photostream_albums(BeautifulSoup(Photostream.driver.page_source))
+        else:
+            self.download_photostream()
 
 if __name__ == '__main__':
 
