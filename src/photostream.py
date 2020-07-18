@@ -9,7 +9,6 @@ import wget
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from optparse import OptionParser
-from urllib.request import urlopen
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
@@ -24,8 +23,6 @@ class MetaPhotostream(type):
             profile      = webdriver.FirefoxProfile()
             profile.set_preference("general.useragent.override", user_agent)
             cls.driver   = webdriver.Firefox(profile)
-        if not hasattr(cls,'metadata'):
-            cls.metadata = dict()
 
 class Photostream(metaclass=MetaPhotostream):
 
@@ -39,7 +36,6 @@ class Photostream(metaclass=MetaPhotostream):
 
         self.count           = 0
         self.metadata        = dict()
-        self.container       = tuple()
 
         if not all([self.directory, self.username]):
             print('FB username and save directory must be specified!')
