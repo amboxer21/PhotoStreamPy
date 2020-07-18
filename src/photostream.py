@@ -120,7 +120,7 @@ class Photostream(metaclass=MetaPhotostream):
         Photostream.driver.get("https://www.facebook.com/"+str(self.username)+"/photos_all")
         self.scroll_to_bottom()
         if self.preserve_albums:
-            self.preserve_photostream_albums(BeautifulSoup(Photostream.driver.page_source))
+            self.preserve_photostream_albums(BeautifulSoup(Photostream.driver.page_source,features="lxml"))
         else:
             self.download_photostream()
 
