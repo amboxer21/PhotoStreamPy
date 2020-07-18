@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import re
 import sys
 import time
@@ -19,10 +20,12 @@ class MetaPhotostream(type):
 
     def __init__(cls,name,bases,dct):
         if not hasattr(cls,'driver'):
-            user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
-            profile    = webdriver.FirefoxProfile()
+            user_agent   = 'Mozilla/5.0 (X11; Linux x86_64; rv:67.0) Gecko/20100101 Firefox/67.0'
+            profile      = webdriver.FirefoxProfile()
             profile.set_preference("general.useragent.override", user_agent)
-            cls.driver = webdriver.Firefox(profile)
+            cls.driver   = webdriver.Firefox(profile)
+        if not hasattr(cls,'metadata'):
+            cls.metadata = dict()
 
 class Photostream(metaclass=MetaPhotostream):
 
@@ -33,6 +36,10 @@ class Photostream(metaclass=MetaPhotostream):
         self.username        = config_dict['username']
         self.directory       = config_dict['directory']
         self.preserve_albums = config_dict['preserve_albums']
+
+        self.count           = 0
+        self.metadata        = dict()
+        self.container       = tuple()
 
         if not all([self.directory, self.username]):
             print('FB username and save directory must be specified!')
@@ -63,19 +70,47 @@ class Photostream(metaclass=MetaPhotostream):
             print('Exception exception: '+str(exception))
             pass
 
+    def parse_photo_metadata(self,photo_metadata):
+
+        link_regex       = 'url\((.*)\)'
+        album_name_regex = '(a class=.*href=\"https:\/\/.*amp;type=3.\>)([a-z0-9\+\-\_ \t]*)(\<\/a\>)'
+        
+        link       = re.search(link_regex,str(photo_metadata[0]), re.I | re.M)
+        album_name = re.search(album_name_regex,str(photo_metadata), re.M | re.I)
+
+        if link is not None:
+            if album_name is not None:
+                self.count += 1
+                self.metadata.update({self.count: {'photo_url': link.group(1), 'album_name': album_name.group(2)}})
+
+    def create_album(self,directory,album_name):
+        directory = ""+directory+""+album_name
+        try:
+            os.makedirs(directory)
+        except FileExistsError as fileExistsError:
+            pass
+        return directory
+    
+    def save_image(self,url,directory):
+        try:
+            wget.download(url,out=directory)
+        except Exception as exception:
+            print('Exception: '+str(exception))
+            pass
+    
     def main(self):
         Photostream.driver.get("https://www.facebook.com/"+str(self.username)+"/photos_all")
         self.scroll_to_bottom()
-        images  = Photostream.driver.find_elements_by_xpath('//i[@style]')
-        for image in images:
-            url = image.get_attribute("style")
-            print("url: "+str(url))
-            results = re.search('(background-image: url\(")(.*)("\);)', str(url), re.M | re.I)
-            if results is not None:
-                try:
-                    wget.download(results.group(2),out=self.directory)
-                except:
-                    pass
+        beautifulSoup = BeautifulSoup(Photostream.driver.page_source)
+        for link in beautifulSoup.find_all('li'):
+            try:
+                self.parse_photo_metadata(link.find_all('a'))
+            except IndexError as indexError:
+                pass
+
+        for item in self.metadata.items():
+            directory = self.create_album(self.directory,item[1]['album_name'])
+            self.save_image(str(item[1]['photo_url']),str(directory))
 
 if __name__ == '__main__':
 
