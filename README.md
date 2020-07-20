@@ -2,7 +2,7 @@
 Let the program run and **DO NOT** send the foreground process to the background or the program will not work correctly. Start the program and leave the computer alone until it finishes.
 
 #### IMPORTANT:
-Facebook no longer allows GET requests due to this program. I am the cause of not being able to download photos via wget - at least for the moment.
+Facebook no longer allows GET requests due to this program. I am the cause of not being able to download photos via wget as of 2020-07-20 - at least for the moment.
 
 #### Install:
 ````
